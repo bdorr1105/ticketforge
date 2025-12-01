@@ -1,9 +1,13 @@
-# TicketForge - Open Source Help Desk Solution
+<div align="center">
+  <img src="frontend/public/logo.png" alt="TicketForge Logo" width="200"/>
 
-A modern, Docker-based help desk ticketing system with role-based permissions, email integration, and a clean web interface.
+  # TicketForge - Open Source Help Desk Solution
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/ldscyber/ticketforge-backend)](https://hub.docker.com/r/ldscyber/ticketforge-backend)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  A modern, Docker-based help desk ticketing system with role-based permissions, email integration, and a clean web interface.
+
+  [![Docker Pulls](https://img.shields.io/docker/pulls/ldscyber/ticketforge-backend)](https://hub.docker.com/r/ldscyber/ticketforge-backend)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+</div>
 
 ## Features
 
@@ -69,49 +73,138 @@ TicketForge/
 
 ## Quick Start
 
-### Option 1: Using Docker Hub (Recommended for Production)
+### Using Docker Compose (Recommended)
 
-Pull and run pre-built images from Docker Hub:
+The easiest way to get started is using Docker Compose with pre-built images from Docker Hub.
 
-```bash
-# Download docker-compose.hub.yml
-curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/docker-compose.hub.yml
+**1. Create a docker-compose.yml file:**
 
-# Create .env file
-curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/.env.example
-cp .env.example .env
-nano .env  # Edit your configuration
+```yaml
+version: '3.8'
 
-# Start the services
-docker-compose -f docker-compose.hub.yml up -d
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ticketforge_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticketforge
+      POSTGRES_USER: ticketforge_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ticketforge_db:/var/lib/postgresql/data
+    networks:
+      - ticketforge_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketforge_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ticketforge-backend:
+    image: ldscyber/ticketforge-backend:latest  # or use :v1.0.0 for specific version
+    container_name: ticketforge_backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5080}:5000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=ticketforge
+      - DB_USER=ticketforge_user
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=7d
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+    volumes:
+      - ticketforge_uploads:/app/uploads
+      - ticketforge_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticketforge_network
+
+  ticketforge-webapp:
+    image: ldscyber/ticketforge-webapp:latest  # or use :v1.0.0 for specific version
+    container_name: ticketforge_webapp
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3080}:80"
+    depends_on:
+      - ticketforge-backend
+    networks:
+      - ticketforge_network
+
+volumes:
+  ticketforge_db:
+  ticketforge_uploads:
+  ticketforge_logs:
+
+networks:
+  ticketforge_network:
+    driver: bridge
 ```
 
-### Option 2: Build from Source
+**2. Create a .env file:**
 
 ```bash
-# Clone the repository
-git clone https://github.com/bdorr1105/ticketforge.git
-cd ticketforge
-
-# Copy and configure environment
+# Download the example .env file
+curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/.env.example
 cp .env.example .env
-nano .env  # Edit configuration
 
-# Start with Docker Compose
+# Edit with your settings
+nano .env
+```
+
+Or create manually with these required settings:
+
+```env
+# Database
+DB_PASSWORD=change_this_password
+
+# JWT Authentication
+JWT_SECRET=change_this_to_a_random_secure_string
+
+# Admin Account
+ADMIN_EMAIL=admin@ticketforge.local
+ADMIN_PASSWORD=admin123
+ADMIN_USERNAME=admin
+
+# Ports (optional)
+BACKEND_PORT=5080
+FRONTEND_PORT=3080
+```
+
+**3. Start TicketForge:**
+
+```bash
 docker-compose up -d
 ```
 
-### Option 3: Using the Startup Script
+That's it! TicketForge will be available at http://localhost:3080
+
+### Build from Source
+
+If you prefer to build from source:
 
 ```bash
-./start.sh
+git clone https://github.com/bdorr1105/ticketforge.git
+cd ticketforge
+cp .env.example .env
+nano .env  # Edit configuration
+./start.sh  # Or use: docker-compose up -d
 ```
-
-The script will:
-- Check for Docker and Docker Compose
-- Create .env file if needed
-- Build and start all services
-- Display access information
 
 ## Configuration
 
@@ -182,65 +275,21 @@ For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md)
 - **Email**: Nodemailer
 - **Containerization**: Docker, Docker Compose
 
-## Development
+## Docker Images
 
-### Running Locally
+TicketForge is available on Docker Hub with version tags:
 
-```bash
-# Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
+- **Backend**: [ldscyber/ticketforge-backend](https://hub.docker.com/r/ldscyber/ticketforge-backend)
+  - `latest` - Latest stable release
+  - `v1.0.0` - Specific version
 
-# Start backend (requires PostgreSQL)
-cd backend && npm run dev
+- **Frontend**: [ldscyber/ticketforge-webapp](https://hub.docker.com/r/ldscyber/ticketforge-webapp)
+  - `latest` - Latest stable release
+  - `v1.0.0` - Specific version
 
-# Start frontend
-cd frontend && npm start
-```
+### Available Environment Variables
 
-### Building Docker Images
-
-```bash
-# Build all images
-docker-compose build
-
-# Build specific service
-docker-compose build ticketforge-backend
-docker-compose build ticketforge-webapp
-```
-
-## Deployment
-
-### Deploying to Docker Hub
-
-1. **Build and tag images**:
-   ```bash
-   # Build backend
-   docker build -t ldscyber/ticketforge-backend:latest ./backend
-   docker build -t ldscyber/ticketforge-backend:v1.0.0 ./backend
-
-   # Build frontend
-   docker build -t ldscyber/ticketforge-webapp:latest ./frontend
-   docker build -t ldscyber/ticketforge-webapp:v1.0.0 ./frontend
-   ```
-
-2. **Push to Docker Hub**:
-   ```bash
-   docker login
-   docker push ldscyber/ticketforge-backend:latest
-   docker push ldscyber/ticketforge-backend:v1.0.0
-   docker push ldscyber/ticketforge-webapp:latest
-   docker push ldscyber/ticketforge-webapp:v1.0.0
-   ```
-
-3. **Users can then deploy using**:
-   ```bash
-   docker-compose -f docker-compose.hub.yml up -d
-   ```
-
-### Environment Variables
-
-See `.env.example` for all available configuration options.
+See [.env.example](.env.example) for all available configuration options.
 
 ## Documentation
 
