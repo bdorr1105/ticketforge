@@ -35,7 +35,6 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRE=${JWT_EXPIRE:-7d}
       # SMTP Settings (OPTIONAL - can be configured in Web UI Settings instead)
       # If you want to configure SMTP via docker-compose, set these values in .env file.
       # Otherwise, leave them blank/remove them and configure via the Web UI.

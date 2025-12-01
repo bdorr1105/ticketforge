@@ -46,11 +46,11 @@ router.post('/login', async (req, res) => {
     // Update last login
     await pool.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
 
-    // Generate JWT token
+    // Generate JWT token (expires in 30 days)
     const token = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+      { expiresIn: '30d' }
     );
 
     logger.info(`User logged in: ${user.username}`);

@@ -115,7 +115,6 @@ services:
       - DB_USER=ticketforge_user
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRE=7d
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_SECURE=${SMTP_SECURE}
@@ -163,7 +162,10 @@ networks:
 curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/.env.example
 cp .env.example .env
 
-# Edit with your settings
+# Generate a secure JWT secret
+export JWT_SECRET=$(openssl rand -base64 32)
+
+# Edit the .env file and paste the JWT_SECRET
 nano .env
 ```
 
@@ -173,7 +175,7 @@ Or create manually with these required settings:
 # Database
 DB_PASSWORD=change_this_password
 
-# JWT Authentication
+# JWT Authentication (generate with: openssl rand -base64 32)
 JWT_SECRET=change_this_to_a_random_secure_string
 
 # Admin Account
