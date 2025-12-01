@@ -16,8 +16,9 @@ uploads/*
 !uploads/.gitkeep
 
 # Database
-*.sql
 database/backups/
+*.sql.backup
+*.dump
 
 # OS
 .DS_Store

@@ -1,0 +1,85 @@
+---
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ticketforge_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticketforge
+      POSTGRES_USER: ticketforge_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ticketforge_db_dev:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5433:5432"  # Expose for database tools
+    networks:
+      - ticketforge_network_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketforge_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ticketforge-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ticketforge_backend_dev
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5080}:5000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=ticketforge
+      - DB_USER=ticketforge_user
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+    volumes:
+      - ./backend:/app  # Mount source code for live editing
+      - /app/node_modules  # Prevent overwriting node_modules
+      - ticketforge_uploads_dev:/app/uploads
+      - ticketforge_logs_dev:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticketforge_network_dev
+    # Optional: Add command to use nodemon for auto-restart
+    # command: npm run dev
+
+  ticketforge-webapp:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:${BACKEND_PORT:-5080}
+    container_name: ticketforge_webapp_dev
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3080}:80"
+    depends_on:
+      - ticketforge-backend
+    networks:
+      - ticketforge_network_dev
+
+volumes:
+  ticketforge_db_dev:
+  ticketforge_uploads_dev:
+  ticketforge_logs_dev:
+
+networks:
+  ticketforge_network_dev:
+    driver: bridge
