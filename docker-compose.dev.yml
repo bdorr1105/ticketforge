@@ -9,8 +9,7 @@ services:
       POSTGRES_USER: ticketforge_user
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ticketforge_db_dev:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./data/postgres-dev:/var/lib/postgresql/data
     ports:
       - "5433:5432"  # Expose for database tools
     networks:
@@ -50,8 +49,8 @@ services:
     volumes:
       - ./backend:/app  # Mount source code for live editing
       - /app/node_modules  # Prevent overwriting node_modules
-      - ticketforge_uploads_dev:/app/uploads
-      - ticketforge_logs_dev:/app/logs
+      - ./data/uploads-dev:/app/uploads
+      - ./data/logs-dev:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,11 +73,6 @@ services:
       - ticketforge-backend
     networks:
       - ticketforge_network_dev
-
-volumes:
-  ticketforge_db_dev:
-  ticketforge_uploads_dev:
-  ticketforge_logs_dev:
 
 networks:
   ticketforge_network_dev:

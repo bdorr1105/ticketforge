@@ -156,7 +156,22 @@ docker compose up -d
 
 That's it! TicketForge will be available at http://localhost:3080
 
-The database will be automatically initialized on first startup - no SQL files needed!
+### What Happens on First Startup
+
+- Database schema is automatically created by backend migrations
+- A `data/` directory is created with subdirectories:
+  - `data/postgres/` - PostgreSQL database files
+  - `data/uploads/` - Uploaded files (tickets, avatars, logos)
+  - `data/logs/` - Application logs
+- Default admin user is created using credentials from `.env`
+- All data is stored in the local `data/` directory for easy backup and portability
+
+### Data Portability
+
+Your TicketForge data is **100% portable**:
+- Simply copy the entire directory (including `data/`) to another server
+- Run `docker compose up -d` on the new server
+- Everything works immediately - database, uploads, settings all preserved!
 
 ### Docker Compose Reference
 
@@ -174,8 +189,7 @@ services:
       POSTGRES_USER: ticketforge_user
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ticketforge_db:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./data/postgres:/var/lib/postgresql/data
     networks:
       - ticketforge_network
     healthcheck:
@@ -185,7 +199,7 @@ services:
       retries: 5
 
   ticketforge-backend:
-    image: ldscyber/ticketforge-backend:latest  # or use :v1.0.0 for specific version
+    image: ldscyber/ticketforge-backend:latest  # or use :v1.1.1 for specific version
     container_name: ticketforge_backend
     restart: unless-stopped
     ports:
@@ -209,8 +223,8 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
     volumes:
-      - ticketforge_uploads:/app/uploads
-      - ticketforge_logs:/app/logs
+      - ./data/uploads:/app/uploads
+      - ./data/logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -218,7 +232,7 @@ services:
       - ticketforge_network
 
   ticketforge-webapp:
-    image: ldscyber/ticketforge-webapp:latest  # or use :v1.0.0 for specific version
+    image: ldscyber/ticketforge-webapp:latest  # or use :v1.1.0 for specific version
     container_name: ticketforge_webapp
     restart: unless-stopped
     ports:
@@ -228,11 +242,6 @@ services:
     networks:
       - ticketforge_network
 
-volumes:
-  ticketforge_db:
-  ticketforge_uploads:
-  ticketforge_logs:
-
 networks:
   ticketforge_network:
     driver: bridge
@@ -241,6 +250,7 @@ networks:
 **Key Points:**
 - Uses pre-built images from Docker Hub (no building required)
 - Database schema automatically created by backend migrations on first startup
+- All data stored in local `./data/` directory using bind mounts (easily portable!)
 - All sensitive values use environment variables from `.env`
 - Health checks ensure proper startup order
 - No need to clone the repository - just download compose file and .env!
@@ -333,7 +343,8 @@ For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md)
 TicketForge is available on Docker Hub with version tags:
 
 - **Backend**: [ldscyber/ticketforge-backend](https://hub.docker.com/r/ldscyber/ticketforge-backend)
-  - `latest` - Latest stable release (currently v1.1.0)
+  - `latest` - Latest stable release (currently v1.1.1)
+  - `v1.1.1` - **Fixed upload directory creation, bind mount support**
   - `v1.1.0` - Automatic database migrations, favicon support, image resizing
   - `v1.0.0` - Initial release
 
@@ -342,9 +353,15 @@ TicketForge is available on Docker Hub with version tags:
   - `v1.1.0` - Dynamic favicon support
   - `v1.0.0` - Initial release
 
-## Recent Changes (v1.1.0)
+## Recent Changes
 
-- **No More Git Clone Required**: Database migrations now run automatically from the backend container
+### v1.1.1 (Current)
+- **Fixed Upload Errors**: Upload subdirectories now created automatically on startup
+- **Bind Mount Support**: All data stored in local `./data/` directory (no Docker volumes!)
+- **Easy Data Portability**: Copy entire directory to new server and it just works
+
+### v1.1.0
+- **No More Git Clone Required**: Database migrations run automatically from the backend container
 - **Favicon Support Fixed**: Custom favicons now display correctly
 - **Auto Image Resizing**: Uploaded logos and favicons are automatically resized (logos: 200px height, favicons: 32x32px)
 - **Improved Deployment**: Truly modular - just download docker-compose.yml and .env to get started

@@ -47,9 +47,36 @@ app.use((req, res) => {
 // Error handler
 app.use(errorHandler);
 
+// Ensure upload directories exist
+const ensureUploadDirectories = async () => {
+  const fs = require('fs').promises;
+  const uploadDirs = [
+    path.join(__dirname, 'uploads'),
+    path.join(__dirname, 'uploads/tickets'),
+    path.join(__dirname, 'uploads/avatars'),
+    path.join(__dirname, 'uploads/branding'),
+    path.join(__dirname, 'logs'),
+  ];
+
+  for (const dir of uploadDirs) {
+    try {
+      await fs.mkdir(dir, { recursive: true });
+    } catch (error) {
+      // Ignore if directory already exists
+      if (error.code !== 'EEXIST') {
+        logger.warn(`Failed to create directory ${dir}:`, error.message);
+      }
+    }
+  }
+  logger.info('Upload directories verified');
+};
+
 // Initialize database and start server
 const startServer = async () => {
   try {
+    // Ensure upload directories exist
+    await ensureUploadDirectories();
+
     // Run database migrations first
     await runMigrations();
 

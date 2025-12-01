@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ticketforge_user
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ticketforge_db:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
     networks:
       - ticketforge_network
     healthcheck:
@@ -19,7 +19,7 @@ services:
       retries: 5
 
   ticketforge-backend:
-    image: ldscyber/ticketforge-backend:latest  # or use :v1.0.0 for specific version
+    image: ldscyber/ticketforge-backend:latest  # or use :v1.1.0 for specific version
     container_name: ticketforge_backend
     restart: unless-stopped
     ports:
@@ -43,8 +43,8 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
     volumes:
-      - ticketforge_uploads:/app/uploads
-      - ticketforge_logs:/app/logs
+      - ./data/uploads:/app/uploads
+      - ./data/logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
       - ticketforge_network
 
   ticketforge-webapp:
-    image: ldscyber/ticketforge-webapp:latest  # or use :v1.0.0 for specific version
+    image: ldscyber/ticketforge-webapp:latest  # or use :v1.1.0 for specific version
     container_name: ticketforge_webapp
     restart: unless-stopped
     ports:
@@ -61,11 +61,6 @@ services:
       - ticketforge-backend
     networks:
       - ticketforge_network
-
-volumes:
-  ticketforge_db:
-  ticketforge_uploads:
-  ticketforge_logs:
 
 networks:
   ticketforge_network:

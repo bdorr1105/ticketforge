@@ -15,6 +15,9 @@ npm-debug.log*
 uploads/*
 !uploads/.gitkeep
 
+# Data directory (bind-mounted volumes)
+data/
+
 # Database
 database/backups/
 *.sql.backup
