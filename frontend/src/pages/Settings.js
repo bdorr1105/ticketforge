@@ -48,6 +48,11 @@ const Settings = () => {
     auto_assign_agent: '',
   });
 
+  const [registrationSettings, setRegistrationSettings] = useState({
+    registration_enabled: 'false',
+    allowed_email_domains: '',
+  });
+
   const [logoFile, setLogoFile] = useState(null);
   const [faviconFile, setFaviconFile] = useState(null);
 
@@ -79,6 +84,12 @@ const Settings = () => {
         tickets_per_page: response.data.tickets_per_page?.value || '',
         max_attachment_size_mb: maxSizeMB.toString(),
         auto_assign_agent: response.data.auto_assign_agent?.value || '',
+      });
+
+      // Populate registration settings
+      setRegistrationSettings({
+        registration_enabled: response.data.registration_enabled?.value || 'false',
+        allowed_email_domains: response.data.allowed_email_domains?.value || '',
       });
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -212,6 +223,32 @@ const Settings = () => {
       await refreshTheme();
     } catch (error) {
       setError(error.response?.data?.error || `Failed to upload ${type}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveRegistration = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Update registration enabled setting
+      await api.put('/settings/registration_enabled', {
+        value: registrationSettings.registration_enabled,
+      });
+
+      // Update allowed email domains setting
+      await api.put('/settings/allowed_email_domains', {
+        value: registrationSettings.allowed_email_domains,
+      });
+
+      setSuccess('Registration settings saved successfully');
+      loadSettings();
+    } catch (error) {
+      setError(error.response?.data?.error || 'Failed to save registration settings');
     } finally {
       setLoading(false);
     }
@@ -449,42 +486,50 @@ const Settings = () => {
         </Typography>
         <Divider sx={{ mb: 2 }} />
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Enable Registration</InputLabel>
-              <Select
-                value={settings.registration_enabled?.value || 'false'}
-                label="Enable Registration"
-                onChange={(e) => handleUpdateSetting('registration_enabled', e.target.value)}
-              >
-                <MenuItem value="true">Enabled</MenuItem>
-                <MenuItem value="false">Disabled</MenuItem>
-              </Select>
-            </FormControl>
-            <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
-              Allow new users to register for an account
-            </Typography>
+        <Box component="form" onSubmit={handleSaveRegistration}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Enable Registration</InputLabel>
+                <Select
+                  value={registrationSettings.registration_enabled}
+                  label="Enable Registration"
+                  onChange={(e) => setRegistrationSettings({ ...registrationSettings, registration_enabled: e.target.value })}
+                >
+                  <MenuItem value="true">Enabled</MenuItem>
+                  <MenuItem value="false">Disabled</MenuItem>
+                </Select>
+              </FormControl>
+              <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
+                Allow new users to register for an account
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Allowed Email Domains"
+                value={registrationSettings.allowed_email_domains}
+                onChange={(e) => setRegistrationSettings({ ...registrationSettings, allowed_email_domains: e.target.value })}
+                placeholder="example.com, company.org"
+                helperText="Comma-separated list of allowed email domains (leave empty to allow all)"
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Allowed Email Domains"
-              defaultValue={settings.allowed_email_domains?.value}
-              onBlur={(e) => handleUpdateSetting('allowed_email_domains', e.target.value)}
-              placeholder="example.com, company.org"
-              helperText="Comma-separated list of allowed email domains (leave empty to allow all)"
-            />
-          </Grid>
-        </Grid>
 
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            When registration is enabled, users can create new accounts on the login page.
-            New users are automatically assigned the "customer" role.
-            You can restrict registration to specific email domains for added security.
-          </Typography>
-        </Alert>
+          <Box sx={{ mt: 3 }}>
+            <Button type="submit" variant="contained" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Registration Settings'}
+            </Button>
+          </Box>
+
+          <Alert severity="info" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              When registration is enabled, users can create new accounts on the login page.
+              New users are automatically assigned the "customer" role.
+              You can restrict registration to specific email domains for added security.
+            </Typography>
+          </Alert>
+        </Box>
       </Paper>
 
       <Paper sx={{ p: 3, mb: 3 }}>
