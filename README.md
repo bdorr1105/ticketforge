@@ -349,15 +349,22 @@ TicketForge is available on Docker Hub with version tags:
   - `v1.0.0` - Initial release
 
 - **Frontend**: [ldscyber/ticketforge-webapp](https://hub.docker.com/r/ldscyber/ticketforge-webapp)
-  - `latest` - Latest stable release (currently v1.1.2)
-  - `v1.1.2` - **Comment deletion feature**
+  - `latest` - Latest stable release (currently v1.1.3)
+  - `v1.1.3` - **Fixed API URL configuration for remote deployments**
+  - `v1.1.2` - Comment deletion feature
   - `v1.1.1` - Fixed registration settings save button
   - `v1.1.0` - Dynamic favicon support
   - `v1.0.0` - Initial release
 
 ## Recent Changes
 
-### v1.1.2 (Current)
+### v1.1.3 (Current)
+- **Fixed Remote Deployment Login Issue**: Frontend now uses relative API URLs (`/api`) instead of hardcoded `localhost`
+  - Nginx properly proxies API requests to backend
+  - Works correctly on remote servers with reverse proxies
+  - Fixes "login not working" issue on production deployments
+
+### v1.1.2
 - **Comment Deletion**: Added ability to delete comments with role-based permissions
   - Admins can delete any comment
   - Agents and customers can delete only their own comments
