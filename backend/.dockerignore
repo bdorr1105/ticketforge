@@ -1,0 +1,45 @@
+# Environment files
+.env
+.env.*
+*.env
+
+# Node modules (installed during build)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Logs
+logs
+*.log
+
+# Uploads (runtime data, not needed in image)
+uploads
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+test
+tests
+__tests__
+
+# Misc
+.npm
+.cache

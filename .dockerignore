@@ -1,0 +1,58 @@
+# Environment files - CRITICAL: Never include in Docker images
+.env
+.env.*
+*.env
+
+# Node modules
+node_modules
+**/node_modules
+
+# Logs and runtime data
+logs
+*.log
+uploads
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md
+docs
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Database data
+postgres-data
+
+# Testing
+coverage
+.nyc_output
+**/__tests__
+**/__mocks__
+
+# Build artifacts
+build
+dist
+
+# Misc
+.npm
+.cache
+tmp
+temp

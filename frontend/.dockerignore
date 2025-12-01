@@ -1,0 +1,50 @@
+# Environment files
+.env
+.env.*
+*.env
+
+# Node modules (installed during build)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output (generated during Docker build)
+build
+dist
+
+# Logs
+logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+src/**/*.test.js
+src/**/*.test.jsx
+src/**/*.spec.js
+src/**/*.spec.jsx
+__tests__
+__mocks__
+
+# Misc
+.npm
+.cache
+public/.DS_Store
