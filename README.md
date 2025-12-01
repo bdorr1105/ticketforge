@@ -47,6 +47,24 @@
 - **Real-time Search**: Instant ticket search as you type
 - **Mobile Responsive**: Works on desktop, tablet, and mobile devices
 
+## Screenshots
+
+<div align="center">
+
+### Light Theme
+<img src="screenshots/ticketforge-light-theme.png" alt="TicketForge Light Theme" width="800"/>
+
+### Dark Theme
+<img src="screenshots/ticketforge-dark-theme.png" alt="TicketForge Dark Theme" width="800"/>
+
+### Navigation Menu
+<img src="screenshots/ticketforge-sidemenu.png" alt="TicketForge Side Menu" width="800"/>
+
+### Custom Branding
+<img src="screenshots/ticketforge-branding.png" alt="TicketForge Branding Settings" width="800"/>
+
+</div>
+
 ## Project Structure
 
 ```
@@ -125,6 +143,92 @@ docker compose up -d
 ```
 
 That's it! TicketForge will be available at http://localhost:3080
+
+### Docker Compose Reference
+
+The included `docker-compose.yml` uses pre-built images from Docker Hub:
+
+```yaml
+---
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ticketforge_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticketforge
+      POSTGRES_USER: ticketforge_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ticketforge_db:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ticketforge_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketforge_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ticketforge-backend:
+    image: ldscyber/ticketforge-backend:latest  # or use :v1.0.0 for specific version
+    container_name: ticketforge_backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5080}:5000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=ticketforge
+      - DB_USER=ticketforge_user
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+    volumes:
+      - ticketforge_uploads:/app/uploads
+      - ticketforge_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticketforge_network
+
+  ticketforge-webapp:
+    image: ldscyber/ticketforge-webapp:latest  # or use :v1.0.0 for specific version
+    container_name: ticketforge_webapp
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3080}:80"
+    depends_on:
+      - ticketforge-backend
+    networks:
+      - ticketforge_network
+
+volumes:
+  ticketforge_db:
+  ticketforge_uploads:
+  ticketforge_logs:
+
+networks:
+  ticketforge_network:
+    driver: bridge
+```
+
+**Key Points:**
+- Uses pre-built images from Docker Hub (no building required)
+- Database initialization scripts are mounted from `./database/init/`
+- All sensitive values use environment variables from `.env`
+- Health checks ensure proper startup order
 
 ### Build from Source (Development)
 
