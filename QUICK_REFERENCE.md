@@ -154,8 +154,8 @@ docker-compose exec ticketforge-backend sh -c "cd logs && rm *.log.old"
 - `SMTP_FROM_NAME` - From display name
 
 ### Optional
-- `BACKEND_PORT` - Backend port (default: 5000)
-- `FRONTEND_PORT` - Frontend port (default: 3000)
+- `BACKEND_PORT` - Backend port (default: 5080)
+- `FRONTEND_PORT` - Frontend port (default: 3080)
 - `MAX_FILE_SIZE` - Max upload size in bytes (default: 10MB)
 
 ## Troubleshooting

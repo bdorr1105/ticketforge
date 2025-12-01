@@ -4,7 +4,7 @@
 
 - Docker and Docker Compose installed on your system
 - At least 2GB of free disk space
-- Ports 3000 and 5000 available (or modify in .env file)
+- Ports 3080 and 5080 available (or modify in .env file)
 
 ## Quick Start
 
@@ -59,8 +59,8 @@ The application will:
 1. Start PostgreSQL database
 2. Initialize the database schema
 3. Create the default admin user
-4. Start the backend API on port 5000
-5. Start the frontend on port 3000
+4. Start the backend API on port 5080
+5. Start the frontend on port 3080
 
 ### 4. Access the Application
 
@@ -142,12 +142,15 @@ TicketForge has three user roles:
 Edit `docker-compose.yml` and `.env`:
 
 ```yaml
-# In docker-compose.yml, change the port mapping:
-ports:
-  - "8080:5000"  # Backend
-  - "8000:80"    # Frontend
+# In docker-compose.yml, the internal container ports are:
+# Backend: 5000 (internal) mapped to host via BACKEND_PORT
+# Frontend: 80 (internal) mapped to host via FRONTEND_PORT
 
-# Update .env accordingly:
+# To change ports, edit .env:
+BACKEND_PORT=5080   # Default
+FRONTEND_PORT=3080  # Default
+
+# Or use custom ports:
 BACKEND_PORT=8080
 FRONTEND_PORT=8000
 ```
