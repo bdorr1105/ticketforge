@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material';
 import api from '../services/api';
 
@@ -16,6 +16,7 @@ export const ThemeProvider = ({ children }) => {
   const [mode, setMode] = useState(localStorage.getItem('themeMode') || 'light');
   const [primaryColor, setPrimaryColor] = useState(localStorage.getItem('primaryColor') || '#1976d2');
   const [logo, setLogo] = useState(localStorage.getItem('logo') || '/logo.png');
+  const [favicon, setFavicon] = useState(localStorage.getItem('favicon') || '/favicon.png');
   const [companyName, setCompanyName] = useState(localStorage.getItem('companyName') || 'TicketForge');
 
   useEffect(() => {
@@ -27,10 +28,33 @@ export const ThemeProvider = ({ children }) => {
     document.title = `${companyName} - Help Desk`;
   }, [companyName]);
 
+  useEffect(() => {
+    // Update favicon dynamically when it changes
+    const updateFavicon = () => {
+      // Remove existing favicon links
+      const existingFavicons = document.querySelectorAll("link[rel*='icon']");
+      existingFavicons.forEach(link => link.remove());
+
+      // Create new favicon link
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = favicon;
+      document.head.appendChild(link);
+
+      // Also update apple-touch-icon for mobile
+      const appleTouchIcon = document.createElement('link');
+      appleTouchIcon.rel = 'apple-touch-icon';
+      appleTouchIcon.href = logo; // Use logo for apple touch icon
+      document.head.appendChild(appleTouchIcon);
+    };
+
+    updateFavicon();
+  }, [favicon, logo]);
+
   const loadThemeSettings = async () => {
     try {
       const response = await api.get('/theme/settings');
-      const { theme_mode, primary_color, logo_url, company_name } = response.data;
+      const { theme_mode, primary_color, logo_url, favicon_url, company_name } = response.data;
 
       if (theme_mode) {
         setMode(theme_mode);
@@ -45,6 +69,11 @@ export const ThemeProvider = ({ children }) => {
       setLogo(finalLogo);
       localStorage.setItem('logo', finalLogo);
 
+      // Use custom favicon if available, otherwise use default favicon
+      const finalFavicon = favicon_url || '/favicon.png';
+      setFavicon(finalFavicon);
+      localStorage.setItem('favicon', finalFavicon);
+
       if (company_name) {
         setCompanyName(company_name);
         localStorage.setItem('companyName', company_name);
@@ -52,9 +81,11 @@ export const ThemeProvider = ({ children }) => {
     } catch (error) {
       // Use defaults if settings not available
       console.error('Failed to load theme settings:', error);
-      // Set default logo on error
+      // Set default logo and favicon on error
       setLogo('/logo.png');
       localStorage.setItem('logo', '/logo.png');
+      setFavicon('/favicon.png');
+      localStorage.setItem('favicon', '/favicon.png');
     }
   };
 
@@ -72,6 +103,11 @@ export const ThemeProvider = ({ children }) => {
   const updateLogo = (logoUrl) => {
     setLogo(logoUrl);
     localStorage.setItem('logo', logoUrl);
+  };
+
+  const updateFavicon = (faviconUrl) => {
+    setFavicon(faviconUrl);
+    localStorage.setItem('favicon', faviconUrl);
   };
 
   const updateCompanyName = (name) => {
@@ -112,10 +148,12 @@ export const ThemeProvider = ({ children }) => {
     mode,
     primaryColor,
     logo,
+    favicon,
     companyName,
     toggleColorMode,
     updatePrimaryColor,
     updateLogo,
+    updateFavicon,
     updateCompanyName,
     refreshTheme: loadThemeSettings,
   };

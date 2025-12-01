@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const sharp = require('sharp');
 const { pool } = require('../config/database');
 const { auth, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -133,7 +134,41 @@ router.post('/upload/:type', auth, authorize('admin'), upload.single('file'), as
       return res.status(400).json({ error: 'Invalid upload type' });
     }
 
-    const fileUrl = `/uploads/branding/${req.file.filename}`;
+    const uploadPath = req.file.path;
+    const processedFilename = `${type}-${Date.now()}.png`;
+    const processedPath = path.join(path.dirname(uploadPath), processedFilename);
+
+    // Process and resize image based on type
+    try {
+      if (type === 'favicon') {
+        // Resize favicon to 32x32 (standard favicon size)
+        await sharp(uploadPath)
+          .resize(32, 32, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 }
+          })
+          .png()
+          .toFile(processedPath);
+      } else {
+        // Resize logo to max 200px height, maintain aspect ratio
+        await sharp(uploadPath)
+          .resize(null, 200, {
+            fit: 'inside',
+            withoutEnlargement: true
+          })
+          .png()
+          .toFile(processedPath);
+      }
+
+      // Delete original uploaded file
+      await fs.unlink(uploadPath);
+    } catch (imageError) {
+      // If image processing fails, use original file
+      logger.warn(`Image processing failed for ${type}, using original:`, imageError.message);
+      await fs.rename(uploadPath, processedPath);
+    }
+
+    const fileUrl = `/uploads/branding/${processedFilename}`;
     const settingKey = type === 'logo' ? 'logo_url' : 'favicon_url';
 
     // Get old file to delete
@@ -157,12 +192,11 @@ router.post('/upload/:type', auth, authorize('admin'), upload.single('file'), as
       try {
         await fs.unlink(oldFilePath);
       } catch (err) {
-        // Ignore error if file doesn't exist
         logger.warn(`Could not delete old ${type} file:`, err.message);
       }
     }
 
-    logger.info(`${type} uploaded by ${req.user.username}: ${fileUrl}`);
+    logger.info(`${type} uploaded and processed by ${req.user.username}: ${fileUrl}`);
 
     res.json({
       message: `${type} uploaded successfully`,

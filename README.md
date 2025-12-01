@@ -93,31 +93,35 @@ TicketForge/
 
 ### Using Docker Compose (Recommended)
 
-The easiest way to get started is using Docker Compose with pre-built images from Docker Hub.
+The easiest way to get started is using Docker Compose with pre-built images from Docker Hub. **No cloning required!**
 
-**1. Clone the repository:**
+**1. Create project directory and files:**
 
 ```bash
-git clone https://github.com/bdorr1105/ticketforge.git
+mkdir ticketforge
 cd ticketforge
 ```
 
-> **Why clone?** The repository includes database initialization scripts required for setup.
+**2. Create docker-compose.yml:**
 
-**2. Configure environment variables:**
+Download or create the compose file:
 
 ```bash
-# Copy the example .env file
-cp .env.example .env
-
-# Generate a secure JWT secret
-openssl rand -base64 32
-
-# Edit .env and configure your settings
-nano .env
+curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/docker-compose.yml
 ```
 
-**Required settings in `.env`:**
+Or create it manually (see Docker Compose Reference section below for full content).
+
+**3. Configure environment variables:**
+
+Download the example .env file:
+
+```bash
+curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/.env.example
+mv .env.example .env
+```
+
+Or create .env manually with these required settings:
 
 ```env
 # Database
@@ -136,13 +140,23 @@ BACKEND_PORT=5080
 FRONTEND_PORT=3080
 ```
 
-**3. Start TicketForge:**
+**4. Generate a secure JWT secret:**
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the output and paste it into your `.env` file as the `JWT_SECRET` value.
+
+**5. Start TicketForge:**
 
 ```bash
 docker compose up -d
 ```
 
 That's it! TicketForge will be available at http://localhost:3080
+
+The database will be automatically initialized on first startup - no SQL files needed!
 
 ### Docker Compose Reference
 
@@ -226,9 +240,10 @@ networks:
 
 **Key Points:**
 - Uses pre-built images from Docker Hub (no building required)
-- Database initialization scripts are mounted from `./database/init/`
+- Database schema automatically created by backend migrations on first startup
 - All sensitive values use environment variables from `.env`
 - Health checks ensure proper startup order
+- No need to clone the repository - just download compose file and .env!
 
 ### Build from Source (Development)
 
@@ -318,12 +333,21 @@ For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md)
 TicketForge is available on Docker Hub with version tags:
 
 - **Backend**: [ldscyber/ticketforge-backend](https://hub.docker.com/r/ldscyber/ticketforge-backend)
-  - `latest` - Latest stable release
-  - `v1.0.0` - Specific version
+  - `latest` - Latest stable release (currently v1.1.0)
+  - `v1.1.0` - Automatic database migrations, favicon support, image resizing
+  - `v1.0.0` - Initial release
 
 - **Frontend**: [ldscyber/ticketforge-webapp](https://hub.docker.com/r/ldscyber/ticketforge-webapp)
-  - `latest` - Latest stable release
-  - `v1.0.0` - Specific version
+  - `latest` - Latest stable release (currently v1.1.0)
+  - `v1.1.0` - Dynamic favicon support
+  - `v1.0.0` - Initial release
+
+## Recent Changes (v1.1.0)
+
+- **No More Git Clone Required**: Database migrations now run automatically from the backend container
+- **Favicon Support Fixed**: Custom favicons now display correctly
+- **Auto Image Resizing**: Uploaded logos and favicons are automatically resized (logos: 200px height, favicons: 32x32px)
+- **Improved Deployment**: Truly modular - just download docker-compose.yml and .env to get started
 
 ### Available Environment Variables
 

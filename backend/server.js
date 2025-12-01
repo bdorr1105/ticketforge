@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const { initDatabase } = require('./config/database');
+const { runMigrations } = require('./migrations');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -49,7 +50,12 @@ app.use(errorHandler);
 // Initialize database and start server
 const startServer = async () => {
   try {
+    // Run database migrations first
+    await runMigrations();
+
+    // Initialize database (creates admin user if needed)
     await initDatabase();
+
     app.listen(PORT, () => {
       logger.info(`TicketForge backend running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);
