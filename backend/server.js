@@ -1,4 +1,7 @@
-require('dotenv').config();
+// Only load dotenv in development (Docker provides env vars in production)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');

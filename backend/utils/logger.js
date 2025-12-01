@@ -10,6 +10,14 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
+    // Always log to console for Docker logs visibility
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    }),
+    // Log to files
     new winston.transports.File({
       filename: path.join(__dirname, '../logs/error.log'),
       level: 'error',
@@ -23,14 +31,5 @@ const logger = winston.createLogger({
     }),
   ],
 });
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    ),
-  }));
-}
 
 module.exports = logger;
