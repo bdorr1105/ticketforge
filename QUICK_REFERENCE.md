@@ -28,8 +28,8 @@ docker-compose logs -f ticketforge-webapp
 
 ## Access
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
+- **Frontend**: http://localhost:3080
+- **Backend API**: http://localhost:5080
 - **Default Admin**: username: `admin`, password: `admin123`
 
 ## Common Commands
@@ -79,7 +79,7 @@ docker-compose exec ticketforge-backend tail -f /app/logs/combined.log
 docker-compose exec ticketforge-backend tail -f /app/logs/error.log
 
 # Check backend health
-curl http://localhost:5000/health
+curl http://localhost:5080/health
 
 # Access backend shell
 docker-compose exec ticketforge-backend sh
@@ -239,27 +239,27 @@ docker-compose exec ticketforge-backend sh -c "rm -f logs/*.log.old"
 ### Authentication
 ```bash
 # Login
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST http://localhost:5080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"login":"admin","password":"admin123"}'
 
 # Get current user
-curl http://localhost:5000/api/auth/me \
+curl http://localhost:5080/api/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### Tickets
 ```bash
 # List tickets
-curl http://localhost:5000/api/tickets \
+curl http://localhost:5080/api/tickets \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Get ticket
-curl http://localhost:5000/api/tickets/TICKET_ID \
+curl http://localhost:5080/api/tickets/TICKET_ID \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Create ticket
-curl -X POST http://localhost:5000/api/tickets \
+curl -X POST http://localhost:5080/api/tickets \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "subject=Test Ticket" \
   -F "description=This is a test" \
@@ -269,11 +269,11 @@ curl -X POST http://localhost:5000/api/tickets \
 ### Comments
 ```bash
 # Get comments
-curl http://localhost:5000/api/comments/ticket/TICKET_ID \
+curl http://localhost:5080/api/comments/ticket/TICKET_ID \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Add comment
-curl -X POST http://localhost:5000/api/comments \
+curl -X POST http://localhost:5080/api/comments \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "ticketId=TICKET_ID" \
   -F "content=My comment" \

@@ -65,8 +65,8 @@ The application will:
 ### 4. Access the Application
 
 Open your browser and navigate to:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
+- **Frontend**: http://localhost:3080
+- **Backend API**: http://localhost:5080
 
 ### 5. First Login
 
