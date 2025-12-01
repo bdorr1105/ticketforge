@@ -77,106 +77,36 @@ TicketForge/
 
 The easiest way to get started is using Docker Compose with pre-built images from Docker Hub.
 
-**1. Create a docker-compose.yml file:**
-
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: ticketforge_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ticketforge
-      POSTGRES_USER: ticketforge_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - ticketforge_db:/var/lib/postgresql/data
-    networks:
-      - ticketforge_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ticketforge_user"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  ticketforge-backend:
-    image: ldscyber/ticketforge-backend:latest  # or use :v1.0.0 for specific version
-    container_name: ticketforge_backend
-    restart: unless-stopped
-    ports:
-      - "${BACKEND_PORT:-5080}:5000"
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=ticketforge
-      - DB_USER=ticketforge_user
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_SECURE=${SMTP_SECURE}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
-      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - ADMIN_USERNAME=${ADMIN_USERNAME}
-    volumes:
-      - ticketforge_uploads:/app/uploads
-      - ticketforge_logs:/app/logs
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - ticketforge_network
-
-  ticketforge-webapp:
-    image: ldscyber/ticketforge-webapp:latest  # or use :v1.0.0 for specific version
-    container_name: ticketforge_webapp
-    restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-3080}:80"
-    depends_on:
-      - ticketforge-backend
-    networks:
-      - ticketforge_network
-
-volumes:
-  ticketforge_db:
-  ticketforge_uploads:
-  ticketforge_logs:
-
-networks:
-  ticketforge_network:
-    driver: bridge
-```
-
-**2. Create a .env file:**
+**1. Clone the repository:**
 
 ```bash
-# Download the example .env file
-curl -O https://raw.githubusercontent.com/bdorr1105/ticketforge/main/.env.example
+git clone https://github.com/bdorr1105/ticketforge.git
+cd ticketforge
+```
+
+> **Why clone?** The repository includes database initialization scripts required for setup.
+
+**2. Configure environment variables:**
+
+```bash
+# Copy the example .env file
 cp .env.example .env
 
 # Generate a secure JWT secret
-export JWT_SECRET=$(openssl rand -base64 32)
+openssl rand -base64 32
 
-# Edit the .env file and paste the JWT_SECRET
+# Edit .env and configure your settings
 nano .env
 ```
 
-Or create manually with these required settings:
+**Required settings in `.env`:**
 
 ```env
 # Database
 DB_PASSWORD=change_this_password
 
-# JWT Authentication (generate with: openssl rand -base64 32)
-JWT_SECRET=change_this_to_a_random_secure_string
+# JWT Authentication (paste the generated secret from above)
+JWT_SECRET=your_generated_jwt_secret_here
 
 # Admin Account
 ADMIN_EMAIL=admin@ticketforge.local
@@ -191,21 +121,23 @@ FRONTEND_PORT=3080
 **3. Start TicketForge:**
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 That's it! TicketForge will be available at http://localhost:3080
 
-### Build from Source
+### Build from Source (Development)
 
-If you prefer to build from source:
+If you want to develop or customize TicketForge:
 
 ```bash
 git clone https://github.com/bdorr1105/ticketforge.git
 cd ticketforge
 cp .env.example .env
 nano .env  # Edit configuration
-./start.sh  # Or use: docker-compose up -d
+
+# Use the development compose file to build from source
+docker compose -f docker-compose.dev.yml up -d --build
 ```
 
 ## Configuration
