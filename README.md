@@ -349,14 +349,21 @@ TicketForge is available on Docker Hub with version tags:
   - `v1.0.0` - Initial release
 
 - **Frontend**: [ldscyber/ticketforge-webapp](https://hub.docker.com/r/ldscyber/ticketforge-webapp)
-  - `latest` - Latest stable release (currently v1.1.1)
-  - `v1.1.1` - **Fixed registration settings save button**
+  - `latest` - Latest stable release (currently v1.1.2)
+  - `v1.1.2` - **Comment deletion feature**
+  - `v1.1.1` - Fixed registration settings save button
   - `v1.1.0` - Dynamic favicon support
   - `v1.0.0` - Initial release
 
 ## Recent Changes
 
-### v1.1.1 (Current)
+### v1.1.2 (Current)
+- **Comment Deletion**: Added ability to delete comments with role-based permissions
+  - Admins can delete any comment
+  - Agents and customers can delete only their own comments
+  - Confirmation dialog prevents accidental deletions
+
+### v1.1.1
 - **Fixed Upload Errors**: Upload subdirectories now created automatically on startup
 - **Fixed Registration Settings**: Added "Save Registration Settings" button with proper state management
 - **Bind Mount Support**: All data stored in local `./data/` directory (no Docker volumes!)

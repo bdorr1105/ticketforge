@@ -194,6 +194,20 @@ const TicketDetail = () => {
     setEditCommentContent('');
   };
 
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/comments/${commentId}`);
+      loadComments();
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      alert(error.response?.data?.error || 'Failed to delete comment');
+    }
+  };
+
   const handleDeleteTicket = async () => {
     try {
       await api.delete(`/tickets/${id}`);
@@ -401,12 +415,34 @@ const TicketDetail = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Chip label={comment.role} size="small" variant="outlined" />
                 {comment.user_id === user?.id && (
+                  <>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditComment(comment)}
+                      disabled={editingCommentId === comment.id}
+                      title="Edit comment"
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteComment(comment.id)}
+                      disabled={editingCommentId === comment.id}
+                      color="error"
+                      title="Delete comment"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </>
+                )}
+                {user?.role === 'admin' && comment.user_id !== user?.id && (
                   <IconButton
                     size="small"
-                    onClick={() => handleEditComment(comment)}
-                    disabled={editingCommentId === comment.id}
+                    onClick={() => handleDeleteComment(comment.id)}
+                    color="error"
+                    title="Delete comment (Admin)"
                   >
-                    <Edit fontSize="small" />
+                    <DeleteIcon fontSize="small" />
                   </IconButton>
                 )}
               </Box>
