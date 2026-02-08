@@ -12,15 +12,23 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Check arguments
-if [ -z "$1" ] || [ -z "$2" ]; then
-    echo -e "${RED}Error: Missing arguments${NC}"
-    echo "Usage: ./publish-docker.sh YOUR_DOCKERHUB_USERNAME VERSION"
-    echo "Example: ./publish-docker.sh john v1.0.0"
+if [ -z "$1" ]; then
+    echo -e "${RED}Error: Missing Docker Hub username${NC}"
+    echo "Usage: ./publish-docker.sh YOUR_DOCKERHUB_USERNAME [VERSION]"
+    echo "Example: ./publish-docker.sh john v1.2.0"
+    echo "If VERSION is omitted, it reads from package.json"
     exit 1
 fi
 
 DOCKERHUB_USERNAME=$1
-VERSION=$2
+
+# Use provided version or read from root package.json
+if [ -n "$2" ]; then
+    VERSION=$2
+else
+    VERSION="v$(node -p "require('./package.json').version")"
+    echo -e "${YELLOW}No version specified, using $VERSION from package.json${NC}"
+fi
 
 echo -e "${GREEN}=== TicketForge Docker Publishing ===${NC}"
 echo "Docker Hub Username: $DOCKERHUB_USERNAME"

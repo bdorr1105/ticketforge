@@ -1,0 +1,10 @@
+{
+  "name": "ticketforge",
+  "version": "1.2.0",
+  "description": "TicketForge - Open Source Help Desk Solution",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "version:sync": "node -e \"const v=require('./package.json').version; const fs=require('fs'); ['frontend','backend'].forEach(d=>{const p=d+'/package.json';const pkg=JSON.parse(fs.readFileSync(p));pkg.version=v;fs.writeFileSync(p,JSON.stringify(pkg,null,2)+'\\n');}); console.log('Synced version '+v+' to frontend and backend');\""
+  }
+}

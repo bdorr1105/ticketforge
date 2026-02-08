@@ -199,7 +199,7 @@ services:
       retries: 5
 
   ticketforge-backend:
-    image: ldscyber/ticketforge-backend:latest  # or use :v1.1.1 for specific version
+    image: ldscyber/ticketforge-backend:latest  # or use :v1.2.0 for specific version
     container_name: ticketforge_backend
     restart: unless-stopped
     ports:
@@ -232,7 +232,7 @@ services:
       - ticketforge_network
 
   ticketforge-webapp:
-    image: ldscyber/ticketforge-webapp:latest  # or use :v1.1.0 for specific version
+    image: ldscyber/ticketforge-webapp:latest  # or use :v1.2.0 for specific version
     container_name: ticketforge_webapp
     restart: unless-stopped
     ports:
@@ -340,47 +340,28 @@ For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md)
 
 ## Docker Images
 
-TicketForge is available on Docker Hub with version tags:
+TicketForge uses unified versioning - both frontend and backend images share the same version tag.
 
 - **Backend**: [ldscyber/ticketforge-backend](https://hub.docker.com/r/ldscyber/ticketforge-backend)
-  - `latest` - Latest stable release (currently v1.1.1)
-  - `v1.1.1` - **Fixed upload directory creation, bind mount support**
-  - `v1.1.0` - Automatic database migrations, favicon support, image resizing
-  - `v1.0.0` - Initial release
-
 - **Frontend**: [ldscyber/ticketforge-webapp](https://hub.docker.com/r/ldscyber/ticketforge-webapp)
-  - `latest` - Latest stable release (currently v1.1.3)
-  - `v1.1.3` - **Fixed API URL configuration for remote deployments**
-  - `v1.1.2` - Comment deletion feature
-  - `v1.1.1` - Fixed registration settings save button
-  - `v1.1.0` - Dynamic favicon support
-  - `v1.0.0` - Initial release
+
+Available tags:
+  - `latest` - Latest stable release (currently v1.2.0)
+  - `v1.2.0` - Unified versioning across frontend and backend
 
 ## Recent Changes
 
-### v1.1.3 (Current)
-- **Fixed Remote Deployment Login Issue**: Frontend now uses relative API URLs (`/api`) instead of hardcoded `localhost`
-  - Nginx properly proxies API requests to backend
-  - Works correctly on remote servers with reverse proxies
-  - Fixes "login not working" issue on production deployments
+### v1.2.0 (Current)
+- **Unified Versioning**: Frontend and backend now share a single project version
+- All Docker images for a release use the same version tag
 
-### v1.1.2
-- **Comment Deletion**: Added ability to delete comments with role-based permissions
-  - Admins can delete any comment
-  - Agents and customers can delete only their own comments
-  - Confirmation dialog prevents accidental deletions
-
-### v1.1.1
-- **Fixed Upload Errors**: Upload subdirectories now created automatically on startup
-- **Fixed Registration Settings**: Added "Save Registration Settings" button with proper state management
-- **Bind Mount Support**: All data stored in local `./data/` directory (no Docker volumes!)
-- **Easy Data Portability**: Copy entire directory to new server and it just works
-
-### v1.1.0
-- **No More Git Clone Required**: Database migrations run automatically from the backend container
-- **Favicon Support Fixed**: Custom favicons now display correctly
-- **Auto Image Resizing**: Uploaded logos and favicons are automatically resized (logos: 200px height, favicons: 32x32px)
-- **Improved Deployment**: Truly modular - just download docker-compose.yml and .env to get started
+### v1.1.x (Legacy - separate frontend/backend versions)
+- Fixed remote deployment login issue (relative API URLs)
+- Comment deletion with role-based permissions
+- Fixed upload directory creation and bind mount support
+- Fixed registration settings save button
+- Automatic database migrations, favicon support, image resizing
+- Easy data portability with local `./data/` directory
 
 ### Available Environment Variables
 
