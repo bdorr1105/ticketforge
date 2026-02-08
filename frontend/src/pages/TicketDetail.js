@@ -330,7 +330,7 @@ const TicketDetail = () => {
                   <MenuItem value="">Unassigned</MenuItem>
                   {agents.map((agent) => (
                     <MenuItem key={agent.id} value={agent.id}>
-                      {agent.username} ({agent.role})
+                      {agent.username}
                     </MenuItem>
                   ))}
                 </Select>

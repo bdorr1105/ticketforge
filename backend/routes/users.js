@@ -176,6 +176,31 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// Get groups for a user (admin or self)
+router.get('/:id/groups', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'admin' && req.user.id !== id) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const result = await pool.query(
+      `SELECT g.id, g.name, g.description
+       FROM groups g
+       INNER JOIN user_groups ug ON g.id = ug.group_id
+       WHERE ug.user_id = $1
+       ORDER BY g.name`,
+      [id]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    logger.error('Get user groups error:', error);
+    res.status(500).json({ error: 'Failed to fetch user groups' });
+  }
+});
+
 // Change password (users can change their own password)
 router.put('/:id/password', auth, async (req, res) => {
   try {
@@ -198,16 +223,16 @@ router.put('/:id/password', auth, async (req, res) => {
     }
 
     // Get current password hash
-    const userResult = await pool.query('SELECT password FROM users WHERE id = $1', [id]);
+    const userResult = await pool.query('SELECT password_hash FROM users WHERE id = $1', [id]);
 
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Verify current password
-    const isValid = await bcrypt.compare(currentPassword, userResult.rows[0].password);
+    const isValid = await bcrypt.compare(currentPassword, userResult.rows[0].password_hash);
     if (!isValid) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      return res.status(400).json({ error: 'Current password is incorrect' });
     }
 
     // Hash new password
@@ -215,7 +240,7 @@ router.put('/:id/password', auth, async (req, res) => {
 
     // Update password
     await pool.query(
-      'UPDATE users SET password = $1, force_password_change = false WHERE id = $2',
+      'UPDATE users SET password_hash = $1, force_password_change = false WHERE id = $2',
       [hashedPassword, id]
     );
 

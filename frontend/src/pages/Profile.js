@@ -10,6 +10,12 @@ import {
   Alert,
   Grid,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  OutlinedInput,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
@@ -34,6 +40,13 @@ const Profile = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState('');
+  const [userGroupIds, setUserGroupIds] = useState([]);
+  const [allGroups, setAllGroups] = useState([]);
+  const [roleGroupError, setRoleGroupError] = useState('');
+  const [roleGroupSuccess, setRoleGroupSuccess] = useState('');
+
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     if (user) {
@@ -43,8 +56,67 @@ const Profile = () => {
         firstName: user.first_name || '',
         lastName: user.last_name || '',
       });
+      setRole(user.role || '');
+      loadUserGroups();
+      loadAllGroups();
     }
   }, [user]);
+
+  const loadUserGroups = async () => {
+    try {
+      const response = await api.get(`/users/${user.id}/groups`);
+      setUserGroupIds(response.data.map(g => g.id));
+    } catch (err) {
+      console.error('Failed to load user groups:', err);
+    }
+  };
+
+  const loadAllGroups = async () => {
+    try {
+      const response = await api.get('/groups');
+      setAllGroups(response.data);
+    } catch (err) {
+      console.error('Failed to load groups:', err);
+    }
+  };
+
+  const handleRoleGroupSave = async () => {
+    setLoading(true);
+    setRoleGroupError('');
+    setRoleGroupSuccess('');
+
+    try {
+      // Update role
+      await api.put(`/users/${user.id}`, { role });
+
+      // Sync group memberships
+      const currentResponse = await api.get(`/users/${user.id}/groups`);
+      const currentGroupIds = currentResponse.data.map(g => g.id);
+
+      // Add to new groups
+      for (const groupId of userGroupIds) {
+        if (!currentGroupIds.includes(groupId)) {
+          await api.post(`/groups/${groupId}/members`, { userId: user.id });
+        }
+      }
+
+      // Remove from old groups
+      for (const groupId of currentGroupIds) {
+        if (!userGroupIds.includes(groupId)) {
+          await api.delete(`/groups/${groupId}/members/${user.id}`);
+        }
+      }
+
+      setRoleGroupSuccess('Role and groups updated successfully!');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (err) {
+      setRoleGroupError(err.response?.data?.error || 'Failed to update role and groups');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -114,9 +186,6 @@ const Profile = () => {
         <Paper elevation={3} sx={{ p: 4 }}>
           <Typography variant="h4" gutterBottom>
             My Profile
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-            Role: <strong>{user?.role}</strong>
           </Typography>
 
           <Divider sx={{ my: 3 }} />
@@ -197,6 +266,81 @@ const Profile = () => {
                 Cancel
               </Button>
             </Box>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Role & Group Section */}
+          <Typography variant="h6" gutterBottom>
+            Role & Group
+          </Typography>
+
+          {roleGroupError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {roleGroupError}
+            </Alert>
+          )}
+
+          {roleGroupSuccess && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {roleGroupSuccess}
+            </Alert>
+          )}
+
+          <Box sx={{ mb: 4 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth disabled={!isAdmin || loading}>
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    label="Role"
+                  >
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="agent">Agent</MenuItem>
+                    <MenuItem value="customer">Customer</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth disabled={!isAdmin || loading}>
+                  <InputLabel>Groups</InputLabel>
+                  <Select
+                    multiple
+                    value={userGroupIds}
+                    onChange={(e) => setUserGroupIds(e.target.value)}
+                    input={<OutlinedInput label="Groups" />}
+                    renderValue={(selected) =>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((id) => {
+                          const group = allGroups.find(g => g.id === id);
+                          return <Chip key={id} label={group?.name || id} size="small" />;
+                        })}
+                      </Box>
+                    }
+                  >
+                    {allGroups.map((group) => (
+                      <MenuItem key={group.id} value={group.id}>
+                        {group.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+
+            {isAdmin && (
+              <Box sx={{ mt: 3 }}>
+                <Button
+                  variant="contained"
+                  onClick={handleRoleGroupSave}
+                  disabled={loading}
+                >
+                  Save Role & Groups
+                </Button>
+              </Box>
+            )}
           </Box>
 
           <Divider sx={{ my: 3 }} />

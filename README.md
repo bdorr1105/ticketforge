@@ -199,7 +199,7 @@ services:
       retries: 5
 
   ticketforge-backend:
-    image: ldscyber/ticketforge-backend:latest  # or use :v1.2.0 for specific version
+    image: ldscyber/ticketforge-backend:latest  # or use :v1.3.0 for specific version
     container_name: ticketforge_backend
     restart: unless-stopped
     ports:
@@ -232,7 +232,7 @@ services:
       - ticketforge_network
 
   ticketforge-webapp:
-    image: ldscyber/ticketforge-webapp:latest  # or use :v1.2.0 for specific version
+    image: ldscyber/ticketforge-webapp:latest  # or use :v1.3.0 for specific version
     container_name: ticketforge_webapp
     restart: unless-stopped
     ports:
@@ -346,12 +346,19 @@ TicketForge uses unified versioning - both frontend and backend images share the
 - **Frontend**: [ldscyber/ticketforge-webapp](https://hub.docker.com/r/ldscyber/ticketforge-webapp)
 
 Available tags:
-  - `latest` - Latest stable release (currently v1.2.0)
+  - `latest` - Latest stable release (currently v1.3.0)
+  - `v1.3.0` - Profile role/group management, assignment dropdown cleanup, password change fixes
   - `v1.2.0` - Unified versioning across frontend and backend
 
 ## Recent Changes
 
-### v1.2.0 (Current)
+### v1.3.0 (Current)
+- **Profile Role & Group Management**: User profile page now displays role and group assignments, editable by admins
+- **Cleaner Assignment Dropdown**: Ticket assignment dropdown no longer shows user roles, just usernames
+- **Fixed Password Change**: Corrected database column reference (`password_hash`) in profile password change
+- **Fixed Force Password Change Flow**: Wrong current password no longer incorrectly logs the user out
+
+### v1.2.0
 - **Unified Versioning**: Frontend and backend now share a single project version
 - All Docker images for a release use the same version tag
 
