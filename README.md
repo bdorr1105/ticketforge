@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="TicketForge Logo" width="200"/>
+  <img src="https://raw.githubusercontent.com/bdorr1105/ticketforge/main/frontend/public/logo.png" alt="TicketForge Logo" width="200"/>
 
   # TicketForge - Open Source Help Desk Solution
 
@@ -52,16 +52,16 @@
 <div align="center">
 
 ### Light Theme
-<img src="screenshots/ticketforge-light-theme.png" alt="TicketForge Light Theme" width="800"/>
+<img src="https://raw.githubusercontent.com/bdorr1105/ticketforge/main/screenshots/ticketforge-light-theme.png" alt="TicketForge Light Theme" width="800"/>
 
 ### Dark Theme
-<img src="screenshots/ticketforge-dark-theme.png" alt="TicketForge Dark Theme" width="800"/>
+<img src="https://raw.githubusercontent.com/bdorr1105/ticketforge/main/screenshots/ticketforge-dark-theme.png" alt="TicketForge Dark Theme" width="800"/>
 
 ### Navigation Menu
-<img src="screenshots/ticketforge-sidemenu.png" alt="TicketForge Side Menu" width="800"/>
+<img src="https://raw.githubusercontent.com/bdorr1105/ticketforge/main/screenshots/ticketforge-sidemenu.png" alt="TicketForge Side Menu" width="800"/>
 
 ### Custom Branding
-<img src="screenshots/ticketforge-branding.png" alt="TicketForge Branding Settings" width="800"/>
+<img src="https://raw.githubusercontent.com/bdorr1105/ticketforge/main/screenshots/ticketforge-branding.png" alt="TicketForge Branding Settings" width="800"/>
 
 </div>
 
