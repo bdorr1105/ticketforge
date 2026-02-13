@@ -402,4 +402,4 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
-Built with ❤️ using modern open-source technologies.
+Built with you in mind ❤️ using modern open-source technologies.
